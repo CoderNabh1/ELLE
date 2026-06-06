@@ -89,7 +89,7 @@ const downloadPDF = (record: AnalysisRecord, index: number) => {
     .meta strong { display: block; font-size: 14px; color: #374151; }
     h2 { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: #111827; }
     .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; background: ${statusColor}22; color: ${statusColor}; border: 1px solid ${statusColor}44; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+    .grid { dino splay: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
     .card { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; }
     .card .label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
     .card .value { font-size: 22px; font-weight: 800; color: #111827; }

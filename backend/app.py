@@ -54,18 +54,11 @@ else:
     print("⚠️ MONGO_URI not found in environment. Database persistence disabled.")
     analyses_collection = None
 
-print("Loading ELLE Model... please wait.")
-try:
-    model_config = {
-        'weights': MODEL_PATH,
-        'format': 'pt',
-        'classes_path': None
-    }
-    model_handle = load_model(model_config)
-    print("✅ Model loaded successfully!")
-except Exception as e:
-    print(f"❌ Error loading model: {e}")
-    model_handle = None
+# --- LAZY MODEL LOADING ---
+# Model is NOT loaded at startup to avoid OOM on Render free tier (512MB).
+# It will be loaded on the first /api/predict request instead.
+model_handle = None
+MODEL_LOAD_ATTEMPTED = False  # Flag to prevent retrying a failed load every request
 
 # --- 3. THE "BRAIN" LOGIC ---
 def calculate_health_risk(total_particles, water_volume_ml=100):
@@ -88,9 +81,27 @@ def resize_image_strict(image, size=(640, 640)):
 # --- 4. API ENDPOINTS ---
 @app.route('/api/predict', methods=['POST'])
 def predict():
-    global STATS_CACHE
-    if not model_handle:
-        return jsonify({"error": "Model not loaded"}), 500
+    global STATS_CACHE, model_handle, MODEL_LOAD_ATTEMPTED
+
+    # --- Lazy load: only load the model on first request ---
+    if model_handle is None and not MODEL_LOAD_ATTEMPTED:
+        MODEL_LOAD_ATTEMPTED = True
+        print("⏳ Lazy-loading ELLE Model on first request... please wait.")
+        try:
+            model_config = {
+                'weights': MODEL_PATH,
+                'format': 'pt',
+                'classes_path': None
+            }
+            model_handle = load_model(model_config)
+            print("✅ Model loaded successfully!")
+        except Exception as e:
+            print(f"❌ Error loading model: {e}")
+            model_handle = None
+            return jsonify({"error": f"Model failed to load: {str(e)}"}), 500
+
+    if model_handle is None:
+        return jsonify({"error": "Model is not available. It failed to load on a previous attempt."}), 500
 
     if 'image' not in request.files:
         return jsonify({"error": "No image uploaded"}), 400
