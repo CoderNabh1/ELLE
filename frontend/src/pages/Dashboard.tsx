@@ -32,7 +32,7 @@ const DEMO_STATS = {
   ],
 };
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(/\/+$/, "");
 
 interface BackendStats {
   metrics: { avg_particles_per_liter: number; avg_contamination: string; total_samples: number };

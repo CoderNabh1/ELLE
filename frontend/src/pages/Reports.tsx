@@ -4,7 +4,7 @@ import { FileText, Download, Calendar, MapPin, AlertCircle, Loader2, RefreshCw, 
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000").replace(/\/+$/, "");
 
 interface AnalysisRecord {
   timestamp: string;

@@ -175,11 +175,14 @@ def get_stats():
 
     print("📊 Querying MongoDB for fresh dashboard stats...")
     try:
-        # Aggregations
-        all_docs = list(analyses_collection.find({}, {"_id": 0}).sort("timestamp", 1))
+        # Aggregations using MongoDB native pipeline to save RAM
+        # 1. Overall stats (total samples, total particles)
+        pipeline_stats = [
+            {"$group": {"_id": None, "total_samples": {"$sum": 1}, "total_particles_all": {"$sum": "$total_particles"}}}
+        ]
+        stats_res = list(analyses_collection.aggregate(pipeline_stats))
         
-        total_samples = len(all_docs)
-        if total_samples == 0:
+        if not stats_res or stats_res[0].get("total_samples", 0) == 0:
             result = {
                 "metrics": {
                     "avg_particles_per_liter": 0,
@@ -193,28 +196,35 @@ def get_stats():
             CACHE_TIMESTAMP = current_time
             return jsonify(result)
 
-        total_particles_all = sum(doc.get("total_particles", 0) for doc in all_docs)
+        total_samples = stats_res[0]["total_samples"]
+        total_particles_all = stats_res[0].get("total_particles_all", 0)
         
         # Calculate avg particles per liter (our formula is per 100mL, so multiply by 10)
         avg_particles = total_particles_all / total_samples
         avg_particles_per_liter = avg_particles * 10
         
-        # Breakdown pie data
-        breakdown_counts = {}
-        for doc in all_docs:
-            for b_name, b_count in doc.get("breakdown", {}).items():
-                breakdown_counts[b_name] = breakdown_counts.get(b_name, 0) + b_count
+        # 2. Breakdown pie data
+        pipeline_breakdown = [
+            {"$match": {"breakdown": {"$type": "object"}}},
+            {"$project": {"breakdown_array": {"$objectToArray": "$breakdown"}}},
+            {"$unwind": "$breakdown_array"},
+            {"$group": {"_id": "$breakdown_array.k", "count": {"$sum": "$breakdown_array.v"}}}
+        ]
+        breakdown_res = list(analyses_collection.aggregate(pipeline_breakdown))
+        breakdown_counts = {item["_id"]: item["count"] for item in breakdown_res}
         
         pieData = [{"name": k, "value": v, "color": "hsl(175, 80%, 50%)"} for k, v in breakdown_counts.items()]
 
-        # Generate trend line (aggregate by day)
-        from collections import defaultdict
-        trend_dict = defaultdict(list)
-        for doc in all_docs:
-            day_str = doc["timestamp"].strftime("%Y-%m-%d")
-            trend_dict[day_str].append(doc.get("total_particles", 0))
-            
-        trendData = [{"date": k, "count": sum(v) / len(v)} for k, v in trend_dict.items()]
+        # 3. Generate trend line (aggregate by day)
+        pipeline_trend = [
+            {"$group": {
+                "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$timestamp"}},
+                "count": {"$avg": "$total_particles"}
+            }},
+            {"$sort": {"_id": 1}}
+        ]
+        trend_res = list(analyses_collection.aggregate(pipeline_trend))
+        trendData = [{"date": item["_id"], "count": item["count"]} for item in trend_res if item["_id"]]
         
         # Overall health logic
         if avg_particles_per_liter >= 2.0:  # 0.2/ml * 10
