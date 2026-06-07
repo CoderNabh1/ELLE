@@ -24,7 +24,7 @@ from models.infer import load_model, infer as run_infer
 UPLOAD_FOLDER = os.path.join(ROOT, 'uploads')
 OUTPUT_FOLDER = os.path.join(ROOT, 'web_outputs')
 MODELS_DIR = os.path.join(ROOT, 'models')
-MODEL_PATH = os.path.join(MODELS_DIR, 'best.pt')
+MODEL_PATH = os.path.join(MODELS_DIR, 'best.onnx')
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
@@ -90,7 +90,7 @@ def predict():
         try:
             model_config = {
                 'weights': MODEL_PATH,
-                'format': 'pt',
+                'format': 'onnx',
                 'classes_path': None
             }
             model_handle = load_model(model_config)

@@ -21,6 +21,7 @@ backend/ml_resources/
 *.pt
 !backend/models/best.pt
 *.onnx
+!backend/models/best.onnx
 
 # IDEs
 .vscode/
