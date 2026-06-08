@@ -3,12 +3,12 @@ import { Link } from "react-router-dom";
 import { Droplets, Cpu, Activity, MapPin, ArrowRight, Upload, BarChart3, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
-import team1 from "@/assets/team-1.jpg";
-import team2 from "@/assets/team-2.jpg";
-import team3 from "@/assets/team-3.jpg";
-import team4 from "@/assets/team-4.jpg";
+import team1 from "@/assets/team-6.jpg";
+import team2 from "@/assets/team-1.jpg";
+import team3 from "@/assets/team-2.jpg";
+import team4 from "@/assets/team-3.jpg";
 import team5 from "@/assets/team-5.jpg";
-import team6 from "@/assets/team-6.jpg";
+import team6 from "@/assets/team-4.jpg";
 
 const fadeUp = {
   initial: { opacity: 0, y: 30 },
@@ -167,12 +167,12 @@ const Index = () => (
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
           {[
-            { img: team1, name: "Dr. Priya Sharma", role: "Lead Researcher" },
-            { img: team2, name: "Marcus Johnson", role: "Environmental Engineer" },
-            { img: team3, name: "Dr. Lin Wei", role: "Data Scientist" },
-            { img: team4, name: "Dr. Erik Müller", role: "Marine Biologist" },
-            { img: team5, name: "Sofia Ramirez", role: "Software Engineer" },
-            { img: team6, name: "Ahmed Hassan", role: "IoT Engineer" },
+            { img: team1, name: "Nabh Garg", role: "DevOps Engineer" },
+            { img: team2, name: "Shruti Dewaskar", role: "Machine Learning Engineer" },
+            { img: team3, name: "Riddhiraj Roy", role: "Research Analyst" },
+            { img: team4, name: "Shristi Jha", role: "Developer & Documentation Engineer" },
+            { img: team5, name: "Vaibhav Mishra", role: "Research Analyst" },
+            { img: team6, name: "Ayush Chandra", role: "Machine Learning Engineer" },
           ].map((member, i) => (
             <motion.div
               key={member.name}
